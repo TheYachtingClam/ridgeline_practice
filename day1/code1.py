@@ -3,7 +3,7 @@ position = 50
 password = 0
 password2 = 0
 
-data = open("data.txt", "r").readlines()
+data = open("day1/data.txt", "r").readlines()
 
 for line in data:
     original_position = position
