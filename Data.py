@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+from collections import deque
 
 
 class Trade:
@@ -13,6 +14,7 @@ class Trade:
 class Position:
     symbol: str
     quantity: int
+    held: deque
     average_cost_basis: Decimal
     realized_p_and_L: Decimal
 
@@ -32,10 +34,12 @@ class Portfolio:
             new_position.average_cost_basis = 0
             new_position.realized_p_and_L = 0
             new_position.quantity = 0
+            new_position.held = deque()
             self.holdings[trade.symbol] = new_position
 
         self.holdings[trade.symbol].quantity += trade.quantity
         self.holdings[trade.symbol].average_cost_basis += trade.price
+        self.holdings[trade.symbol].held.append((trade.quantity, trade.price))
 
     def list_position(self):
         for key, value in self.holdings.items():
