@@ -1,21 +1,26 @@
 from collections import deque
+from math import pow
 
 
 def get_joltage2(bank: str, amount: int) -> int:
     total = 0
     last_digit = 0
     last_place = 0
-    last_multiplier = 10 * (amount - 1)
+    last_multiplier = pow(10, amount - 1)
     working_bank = bank
 
     for place in range(amount):
-        print(f"workingbank={working_bank[:-(amount - place - 1)]}")
-        for index, digit in enumerate(working_bank[:-(amount - place - 1)]):
+        if amount - place - 1 == 0:
+            active_search_area = working_bank
+        else:
+            active_search_area = working_bank[:-(amount-place-1)]
+        # print(f"active_search_area={active_search_area}")
+        for index, digit in enumerate(active_search_area):
             if int(digit) > last_place:
                 last_place = int(digit)
                 last_digit = index
 
-        print(f"remaining string={working_bank[last_digit+1:]}")
+        # print(f"remaining string={working_bank[last_digit+1:]}")
         working_bank = working_bank[last_digit+1:]
         total += last_place * last_multiplier
         last_digit = 0
@@ -49,12 +54,12 @@ def get_joltage(bank: str, num_batteries: int) -> int:
     return int(joltage_str)
 
 
-data = open("day3/test.txt", "r").readlines()
+data = open("day3/data.txt", "r").readlines()
 
 joltage_total = 0
 
 for bank in data:
-    joltage = get_joltage2(bank.strip(), 2)
+    joltage = get_joltage2(bank.strip(), 12)
     print(f"joltage={joltage}")
     joltage_total += joltage
 
