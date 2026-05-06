@@ -1,6 +1,6 @@
 
 
-def count_adjacent(location: dict[int, dict[int, bool]], y: int, x: int) -> int:
+def count_adjacent(location: dict[int, dict[int, str]], y: int, x: int) -> int:
     count = 0
     if y != 0 and x != 0 and location[y - 1][x-1] == '@':
         count += 1
@@ -21,24 +21,37 @@ def count_adjacent(location: dict[int, dict[int, bool]], y: int, x: int) -> int:
     return count
 
 
-floor: dict[int, dict[int, bool]] = {}
+floor: dict[int, dict[int, str]] = {}
 
 with open("day4/data.txt") as data:
     for y_index, line in enumerate(data.readlines()):
         floor[y_index] = {}
         for x_index, item in enumerate(line.strip()):
             floor[y_index][x_index] = item
+    total_count = 0
+    count = 1
 
-    count = 0
-    for y in range(len(floor)):
+    while count > 0:
+        count = 0
 
-        line = ''
-        for x in range(len(floor[0])):
-            if floor[y][x] == '@' and count_adjacent(floor, y, x) < 4:
-                count += 1
-                line += 'x'
-            else:
-                line += floor[y][x]
-        print(line)
+        new_floor: dict[int, dict[int, str]] = {}
 
-    print(f"count={count}")
+        for y in range(len(floor)):
+            line = ''
+            new_floor[y] = {}
+            for x in range(len(floor[0])):
+                if floor[y][x] == '@' and count_adjacent(floor, y, x) < 4:
+                    count += 1
+                    highlighted = '\033[43m' + '@' + '\033[0m'
+                    line += highlighted
+                    new_floor[y][x] = 'x'
+                else:
+                    line += floor[y][x]
+                    new_floor[y][x] = floor[y][x]
+            print(line)
+
+        floor = new_floor
+
+        print(f"removed {count}\n")
+        total_count += count
+    print(f"total_count={total_count}")
