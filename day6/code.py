@@ -36,6 +36,9 @@ class homework:
     problems: list[problem] = []
 
     def __init__(self, file: str):
+        self.import_simple(file)
+
+    def import_simple(self, file: str):
         with open(file, 'r') as data:
             num_input: list[list[int]] = []
             actions: list[str]
