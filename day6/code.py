@@ -36,7 +36,40 @@ class homework:
     problems: list[problem] = []
 
     def __init__(self, file: str):
-        self.import_simple(file)
+        self.import_complex(file)
+
+    def import_complex(self, file: str):
+        with open(file, 'r') as data:
+            num_input: list[int] = []
+            lines: list[str] = []
+
+            for line in data.readlines():
+                lines.append(line[:-1])
+
+            for index, _ in enumerate(lines[0]):
+                li = ''
+                val = len(lines[0]) - index - 1
+                for internal_index, _ in enumerate(lines):
+                    if lines[internal_index][val] == '+':
+                        num_input.append(int(li))
+                        li = ''
+                        self.problems.append(
+                            problem(numbers=num_input.copy(), action='+'))
+                        num_input.clear()
+                    elif lines[internal_index][val] == '*':
+                        num_input.append(int(li))
+                        li = ''
+                        self.problems.append(
+                            problem(numbers=num_input.copy(), action='*'))
+                        num_input.clear()
+                    else:
+
+                        cha = lines[internal_index][val]
+                        if str.isnumeric(cha):
+                            li += cha
+                if str.isnumeric(li):
+                    num_input.append(int(li))
+                    li = ''
 
     def import_simple(self, file: str):
         with open(file, 'r') as data:
