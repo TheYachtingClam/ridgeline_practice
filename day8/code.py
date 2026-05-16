@@ -66,7 +66,7 @@ class Circuit:
 
 class pad:
     boxes: list[junction_box] = []
-    wires: list[Wire] = []
+    circuits: list[Circuit] = []
 
     def __init__(self, file: int):
         with open(file, 'r') as data:
@@ -77,10 +77,87 @@ class pad:
                 self.boxes.append(box)
 
     def __str__(self):
-        ret_val: int = ''
+        val = 0
         for box in self.boxes:
-            ret_val += f'{box}\n'
-        return ret_val
+            pass
+            # print(box)
+        for circuit in self.circuits:
+            # print(circuit)
+            val += circuit.getCircuitLength()
+        return f'pad connected {val}/{len(self.boxes)}'
+
+    def get_circuit_total(self):
+        val = 0
+        for circuit in self.circuits:
+            val += circuit.getCircuitLength()
+        return val
+
+    def connect_shortest(self, amount: int, after: int):
+        shortest: list[Wire] = []
+        list_max = 0
+
+        for outsidebox_index, outsidebox in enumerate(self.boxes):
+            if outsidebox_index + 1 == len(self.boxes):
+                continue
+            for insidebox_index, insidebox in enumerate(self.boxes[outsidebox_index+1:]):
+                if insidebox_index == outsidebox_index:
+                    continue
+                distance = outsidebox.find_distance(insidebox)
+                # print(f'distance={distance}')
+                if distance < after:
+                    continue
+
+                if len(shortest) < amount or distance < list_max:
+                    w = Wire(outsidebox, insidebox)
+                    shortest.append(w)
+                    # print(f"adding {w}")
+
+                    if len(shortest) > amount:
+                        max_to_remove = max(
+                            shortest, key=lambda wire: wire.distance)
+                        # print(f"removing {max_to_remove}")
+                        shortest.pop(shortest.index(max_to_remove))
+
+                    list_max = max(
+                        shortest, key=lambda wire: wire.distance).distance
+        new_shortest = sorted(shortest, key=lambda wire: wire.distance)
+
+        for short in new_shortest:
+            # print(f'working on wire: {short}')
+            wire_found = False
+            circuits_wire_is_found_in = []
+            for circuit in self.circuits:
+                if circuit.is_wire_in_circuit(short):
+                    circuits_wire_is_found_in.append(circuit)
+                    wire_found = True
+
+            if wire_found:
+                if len(circuits_wire_is_found_in) >= 2:
+                    new_circuit = Circuit()
+                    for matched_circuit in circuits_wire_is_found_in:
+                        new_circuit.merge_circuit(matched_circuit)
+                        self.circuits.remove(matched_circuit)
+                    new_circuit.add_wire(short)
+                    self.circuits.append(new_circuit)
+                else:
+                    circuits_wire_is_found_in[0].add_wire(short)
+
+            if not wire_found:
+                new_circuit = Circuit()
+                new_circuit.add_wire(short)
+                self.circuits.append(new_circuit)
+
+            if self.get_circuit_total() == len(self.boxes):
+                print(
+                    f'last wire found={short} total_circuits_connected={self.get_circuit_total()}')
+                return (list_max, len(self.boxes) - self.get_circuit_total())
+
+        val = 0
+        for circuit in self.circuits:
+            # print(circuit)
+            val += circuit.getCircuitLength()
+
+        return (list_max, len(self.boxes) - val)
 
     def find_shortest_connections(self, amount: int) -> list[Wire]:
         shortest: list[Wire] = []
@@ -109,8 +186,8 @@ class pad:
                     list_max = max(
                         shortest, key=lambda wire: wire.distance).distance
 
-        # for short in sorted(shortest, key=lambda wire: wire.distance):
-        #     print(short)
+        for short in sorted(shortest, key=lambda wire: wire.distance):
+            print(short)
 
         circuits: list[Circuit] = []
         for short in shortest:
@@ -153,5 +230,8 @@ class pad:
 
 
 my_pad = pad('day8/data.txt')
-# print(my_pad)
-my_pad.find_shortest_connections(1000)
+print(my_pad)
+# my_pad.find_shortest_connections(10)
+m = my_pad.connect_shortest(10000, 0)
+print(m)
+print(my_pad)
